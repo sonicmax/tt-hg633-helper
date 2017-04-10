@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">TT-HG633 Helper</string>
+
+    <string name="login_placeholder_username">Username</string>
+    <string name="login_placeholder_password">Password</string>
+    <string name="login_button_text">Login</string>
+
+    <string name="uptime">Uptime: </string>
+    <string name="wifi_devices">Wireless Devices: </string>
+    <string name="connected_devices">Connected Devices: </string>
+
+    <string name="menu_internet">Internet</string>
+    <string name="menu_home_ntwk">Home Network</string>
+    <string name="menu_sharing">Sharing</string>
+    <string name="menu_maintain">Maintain</string>
+    <string name="menu_reboot">Reboot</string>
+    <string name="menu_logout">Logout</string>
+
+    <string name="device_ip">IP: </string>
+    <string name="device_mac">MAC: </string>
+
+    <string name="refresh">Refresh</string>
+    <string name="menu_home_ntwk_inactive">Toggle Inactive Devices</string>
+</resources>
