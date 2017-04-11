@@ -1,4 +1,4 @@
-package com.sonicmax.tt_hg633helper.utilities;
+package com.sonicmax.tt_hg633helper.network;
 
 public class CsrfHolder {
     private String param;

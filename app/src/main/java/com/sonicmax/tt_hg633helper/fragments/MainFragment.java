@@ -17,7 +17,7 @@ import com.sonicmax.tt_hg633helper.loaders.AccountManager;
 import com.sonicmax.tt_hg633helper.loaders.ApiRequestHandler;
 import com.sonicmax.tt_hg633helper.network.ApiPoller;
 import com.sonicmax.tt_hg633helper.ui.ProgressDialogHandler;
-import com.sonicmax.tt_hg633helper.utilities.CsrfHolder;
+import com.sonicmax.tt_hg633helper.network.CsrfHolder;
 import com.sonicmax.tt_hg633helper.utilities.UptimeFormatter;
 
 import org.json.JSONArray;

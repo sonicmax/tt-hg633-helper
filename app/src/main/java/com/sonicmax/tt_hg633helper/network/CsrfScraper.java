@@ -1,4 +1,4 @@
-package com.sonicmax.tt_hg633helper.utilities;
+package com.sonicmax.tt_hg633helper.network;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

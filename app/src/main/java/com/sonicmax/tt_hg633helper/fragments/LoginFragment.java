@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,7 @@ import android.widget.EditText;
 import com.sonicmax.tt_hg633helper.R;
 import com.sonicmax.tt_hg633helper.loaders.AccountManager;
 import com.sonicmax.tt_hg633helper.ui.ProgressDialogHandler;
-import com.sonicmax.tt_hg633helper.utilities.CsrfHolder;
+import com.sonicmax.tt_hg633helper.network.CsrfHolder;
 import com.sonicmax.tt_hg633helper.utilities.SharedPreferenceManager;
 
 public class LoginFragment extends Fragment implements AccountManager.EventInterface {

@@ -10,15 +10,12 @@ import android.util.Log;
 import com.sonicmax.tt_hg633helper.network.WebRequest;
 import com.sonicmax.tt_hg633helper.parsers.DiagnoseLanParser;
 import com.sonicmax.tt_hg633helper.parsers.HostInfoParser;
-import com.sonicmax.tt_hg633helper.utilities.ApiPathManager;
-import com.sonicmax.tt_hg633helper.utilities.DataFilter;
+import com.sonicmax.tt_hg633helper.network.ApiPathManager;
+import com.sonicmax.tt_hg633helper.utilities.JsonDataFilter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Sends, receives and stores data from router APIs.
@@ -130,7 +127,7 @@ public class ApiRequestHandler implements LoaderManager.LoaderCallbacks<Object> 
 
 
                         if (response != null) {
-                            String filteredResponse = DataFilter.filter(response);
+                            String filteredResponse = JsonDataFilter.filter(response);
 
                             try {
                                 Object data;
@@ -139,9 +136,9 @@ public class ApiRequestHandler implements LoaderManager.LoaderCallbacks<Object> 
                                 // We can decide how to read data in UI layer
 
                                 if (filteredResponse.startsWith("[")) {
-                                    data = DataFilter.getDataAsJsonArray(filteredResponse);
+                                    data = JsonDataFilter.getDataAsJsonArray(filteredResponse);
                                 } else {
-                                    data = DataFilter.getDataAsJson(filteredResponse);
+                                    data = JsonDataFilter.getDataAsJson(filteredResponse);
                                 }
 
                                 checkAndInsertToDatabase(data, endpoint);

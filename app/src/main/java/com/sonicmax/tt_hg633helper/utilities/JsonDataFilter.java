@@ -4,7 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class DataFilter {
+public class JsonDataFilter {
     private static final String START_STRING = "while(1); /*";
     private static final String END_STRING = "*/";
 
