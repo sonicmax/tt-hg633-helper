@@ -1,12 +1,11 @@
 package com.sonicmax.tt_hg633helper.ui;
 
 import android.content.Context;
-import android.net.Network;
 import android.util.Log;
 import android.view.View;
 
 import com.sonicmax.tt_hg633helper.R;
-import com.sonicmax.tt_hg633helper.adapters.NetworkDeviceAdapter;
+import com.sonicmax.tt_hg633helper.adapters.WifiDeviceAdapter;
 import com.sonicmax.tt_hg633helper.utilities.UptimeFormatter;
 import com.squareup.picasso.Picasso;
 
@@ -29,7 +28,7 @@ public class HostInfoUiHelper {
     private static final String PARENT_CONTROL = "ParentControlEnable";
 
 
-    public static void populateCard(Context context, JSONObject device, NetworkDeviceAdapter.NetworkDeviceViewHolder viewHolder) {
+    public static void populateCard(Context context, JSONObject device, WifiDeviceAdapter.NetworkDeviceViewHolder viewHolder) {
         try {
             String vendorId = device.getString(VENDOR_ID);
             String hostName = device.getString(HOST_NAME);

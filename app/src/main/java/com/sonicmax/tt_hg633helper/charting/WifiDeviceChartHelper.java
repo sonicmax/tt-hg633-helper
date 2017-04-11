@@ -7,13 +7,12 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
-import com.sonicmax.tt_hg633helper.database.AppDataContract.DevicePerformanceEntry;
+import com.sonicmax.tt_hg633helper.database.AppDataContract.WifiPerformanceEntry;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,7 @@ import java.util.Map;
  * for each device and performing some UI modifications to the LineChart.
  */
 
-public class DeviceInfoChartHelper {
+public class WifiDeviceChartHelper {
     private final String LAYER_2_INTERFACE = "Layer2Interface";
     private final String DEVICE_RATE = "AssociatedDeviceRate";
     private final String MAC_ADDRESS = "MACAddress";
@@ -35,17 +34,11 @@ public class DeviceInfoChartHelper {
     private final Map<String, List<Entry>> mDeviceRates;
     private final Map<String, List<Entry>> mDeviceSignals;
 
-    private long mReferenceTimestamp;
     private boolean mHasMultipleEntries = false;
 
-    public DeviceInfoChartHelper() {
+    public WifiDeviceChartHelper() {
         mDeviceRates = new HashMap<>();
         mDeviceSignals = new HashMap<>();
-        mReferenceTimestamp = new Date().getTime();
-    }
-
-    public boolean hasMultipleEntries() {
-        return mHasMultipleEntries;
     }
 
     public void getEntriesFromResponse(JSONObject device, long time) throws JSONException {
@@ -69,19 +62,15 @@ public class DeviceInfoChartHelper {
 
         mDeviceRates.get(macAddress).add(new Entry(time, deviceRate));
         mDeviceSignals.get(macAddress).add(new Entry(time, convertDbmToPercentage(deviceSignal)));
-
-        if (!mHasMultipleEntries && mDeviceRates.get(macAddress).size() > 1) {
-            mHasMultipleEntries = true;
-        }
     }
 
     public void getEntryFromCursor(Cursor cursor) {
-        String macAddress = cursor.getString(cursor.getColumnIndex(DevicePerformanceEntry.COLUMN_MAC_ADDRESS));
-        long timestamp = cursor.getLong(cursor.getColumnIndex(DevicePerformanceEntry.COLUMN_TIMESTAMP));
-        int deviceRate = Integer.parseInt(cursor.getString(cursor.getColumnIndex(DevicePerformanceEntry.COLUMN_DEVICE_RATE))
+        String macAddress = cursor.getString(cursor.getColumnIndex(WifiPerformanceEntry.COLUMN_MAC_ADDRESS));
+        long timestamp = cursor.getLong(cursor.getColumnIndex(WifiPerformanceEntry.COLUMN_TIMESTAMP));
+        int deviceRate = Integer.parseInt(cursor.getString(cursor.getColumnIndex(WifiPerformanceEntry.COLUMN_DEVICE_RATE))
                 .replace(" Mbps", ""));
 
-        int rssi = cursor.getInt(cursor.getColumnIndex(DevicePerformanceEntry.COLUMN_DEVICE_RSSI));
+        int rssi = cursor.getInt(cursor.getColumnIndex(WifiPerformanceEntry.COLUMN_DEVICE_RSSI));
 
         if (mDeviceRates.get(macAddress) == null) {
             mDeviceRates.put(macAddress, new ArrayList<Entry>());

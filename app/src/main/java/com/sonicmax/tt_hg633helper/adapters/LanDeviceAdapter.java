@@ -15,12 +15,12 @@ import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
-
 import com.sonicmax.tt_hg633helper.R;
-import com.sonicmax.tt_hg633helper.charting.DeviceInfoChartHelper;
+import com.sonicmax.tt_hg633helper.charting.LanDeviceChartHelper;
 import com.sonicmax.tt_hg633helper.charting.TimestampAxisValueFormatter;
-import com.sonicmax.tt_hg633helper.database.DeviceDataProvider;
-import com.sonicmax.tt_hg633helper.ui.HostInfoUiHelper;
+import com.sonicmax.tt_hg633helper.database.LanDeviceDataProvider;
+import com.sonicmax.tt_hg633helper.database.WifiDeviceDataProvider;
+import com.sonicmax.tt_hg633helper.ui.DiagnoseLanUiHelper;
 import com.sonicmax.tt_hg633helper.utilities.SharedPreferenceManager;
 
 import org.json.JSONException;
@@ -30,27 +30,27 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class NetworkDeviceAdapter extends SelectableAdapter {
+public class LanDeviceAdapter extends RecyclerView.Adapter<LanDeviceAdapter.NetworkDeviceViewHolder> {
 
     private final String LOG_TAG = this.getClass().getSimpleName();
 
-    private final int SIGNAL_QUALITY = 0;
-    private final int DEVICE_RATE = 1;
+    private final int BYTES_SENT = 0;
+    private final int BYTES_RECEIVED = 1;
 
     private final Context mContext;
     private final List<JSONObject> mDevices;
-    private final DeviceInfoChartHelper mChartHelper;
-    private final DeviceDataProvider mDataProvider;
+    private final LanDeviceChartHelper mChartHelper;
+    private final LanDeviceDataProvider mDataProvider;
     private final long mReferenceTimestamp;
 
     private int mChartType;
     private int mExpandedPosition = -1;
 
-    public NetworkDeviceAdapter (Context context) {
+    public LanDeviceAdapter(Context context) {
         mContext = context;
         mDevices = new ArrayList<>();
-        mChartHelper = new DeviceInfoChartHelper();
-        mDataProvider = new DeviceDataProvider(context);
+        mChartHelper = new LanDeviceChartHelper();
+        mDataProvider = new LanDeviceDataProvider(context);
         mReferenceTimestamp = SharedPreferenceManager.getLong(context, "reference_timestamp");
 
         getPerformanceRecordsFromDatabase();
@@ -71,6 +71,7 @@ public class NetworkDeviceAdapter extends SelectableAdapter {
 
         try {
             for (JSONObject device : devices) {
+                Log.v(LOG_TAG, device.toString());
                 mChartHelper.getEntriesFromResponse(device, relativeTime);
             }
         } catch (JSONException e) {
@@ -88,22 +89,22 @@ public class NetworkDeviceAdapter extends SelectableAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        return R.layout.home_ntwk_device_card;
+        return R.layout.lan_device_card;
     }
 
     @Override
-    public NetworkDeviceAdapter.NetworkDeviceViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+    public LanDeviceAdapter.NetworkDeviceViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
 
-        return new NetworkDeviceAdapter.NetworkDeviceViewHolder(LayoutInflater.
+        return new LanDeviceAdapter.NetworkDeviceViewHolder(LayoutInflater.
                 from(viewGroup.getContext()).
                 inflate(viewType, viewGroup, false), mReferenceTimestamp);
     }
 
     @Override
-    public void onBindViewHolder(NetworkDeviceAdapter.NetworkDeviceViewHolder viewHolder, int position) {
+    public void onBindViewHolder(LanDeviceAdapter.NetworkDeviceViewHolder viewHolder, int position) {
         JSONObject device = mDevices.get(position);
         viewHolder.device = device;
-        HostInfoUiHelper.populateCard(mContext, device, viewHolder);
+        DiagnoseLanUiHelper.populateCard(mContext, device, viewHolder);
         handleDetailExpansion(viewHolder, position);
 
         if (viewHolder.itemView.isActivated()) {
@@ -118,22 +119,14 @@ public class NetworkDeviceAdapter extends SelectableAdapter {
 
         try {
             switch (mChartType) {
-                case SIGNAL_QUALITY:
-                    data = new LineData(mChartHelper.getSignalDataSet(device));
-                    chartView.getAxisLeft().setAxisMinimum(0);
-                    chartView.getAxisLeft().setAxisMaximum(100);
-                    chartView.getAxisRight().setAxisMinimum(0);
-                    chartView.getAxisRight().setAxisMaximum(100);
+                case BYTES_SENT:
+                    data = new LineData(mChartHelper.getBytesSent(device));
                     chartView.getXAxis().setLabelCount(2, true);
                     chartView.getXAxis().setAvoidFirstLastClipping(true);
                     break;
 
-                case DEVICE_RATE:
-                    data = new LineData(mChartHelper.getDeviceRateDataSet(device));
-                    chartView.getAxisLeft().setAxisMinimum(0);
-                    chartView.getAxisLeft().setAxisMaximum(150);
-                    chartView.getAxisRight().setAxisMinimum(0);
-                    chartView.getAxisRight().setAxisMaximum(150);
+                case BYTES_RECEIVED:
+                    data = new LineData(mChartHelper.getBytesReceived(device));
                     chartView.getXAxis().setLabelCount(2, true);
                     chartView.getXAxis().setAvoidFirstLastClipping(true);
                     break;
@@ -173,10 +166,8 @@ public class NetworkDeviceAdapter extends SelectableAdapter {
     }
 
     public class NetworkDeviceViewHolder extends RecyclerView.ViewHolder {
-        private final int SIGNAL_QUALITY = 0;
-        private final int DEVICE_RATE = 1;
-
         public CardView cardView;
+        public TextView lanView;
         public TextView nameView;
         public TextView ipView;
         public TextView macView;
@@ -190,6 +181,7 @@ public class NetworkDeviceAdapter extends SelectableAdapter {
         public NetworkDeviceViewHolder(View view, long referenceTimestamp) {
             super(view);
             cardView = (CardView) view;
+            lanView = (TextView) view.findViewById(R.id.device_lan);
             nameView = (TextView) view.findViewById(R.id.device_name);
             ipView = (TextView) view.findViewById(R.id.device_ip_value);
             macView = (TextView) view.findViewById(R.id.device_mac_value);
@@ -203,28 +195,27 @@ public class NetworkDeviceAdapter extends SelectableAdapter {
         }
 
         private void initLineChart(View view, long referenceTimestamp) {
-            chartView.setTouchEnabled(false);
-            chartView.setScaleEnabled(false);
+            // chartView.setTouchEnabled(false);
             chartView.getDescription().setEnabled(false);
             chartView.getAxisLeft().setEnabled(false);
             chartView.getXAxis().setValueFormatter(new TimestampAxisValueFormatter(mContext, referenceTimestamp));
         }
 
         private void setListeners(View view) {
-            Button signalButton = (Button) view.findViewById(R.id.device_chart_signal);
-            Button rateButton = (Button) view.findViewById(R.id.device_chart_dbm);
+            Button sentButton = (Button) view.findViewById(R.id.device_chart_bytes_sent);
+            Button receivedButton = (Button) view.findViewById(R.id.device_chart_bytes_received);
 
-            signalButton.setOnClickListener(new View.OnClickListener() {
+            sentButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    needChartUpdate(chartView, SIGNAL_QUALITY, device);
+                    needChartUpdate(chartView, BYTES_SENT, device);
                 }
             });
 
-            rateButton.setOnClickListener(new View.OnClickListener() {
+            receivedButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    needChartUpdate(chartView, DEVICE_RATE, device);
+                    needChartUpdate(chartView, BYTES_RECEIVED, device);
                 }
             });
         }

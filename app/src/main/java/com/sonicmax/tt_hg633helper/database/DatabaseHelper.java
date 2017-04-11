@@ -5,7 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.sonicmax.tt_hg633helper.database.AppDataContract.DeviceEntry;
-import com.sonicmax.tt_hg633helper.database.AppDataContract.DevicePerformanceEntry;
+import com.sonicmax.tt_hg633helper.database.AppDataContract.WifiPerformanceEntry;
+import com.sonicmax.tt_hg633helper.database.AppDataContract.LanPerformanceEntry;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
@@ -28,15 +29,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 DeviceEntry.COLUMN_VENDOR_CLASS_ID + " TEXT NOT NULL, " +
                 DeviceEntry.COLUMN_LAYER_2_INTERFACE + " REAL NOT NULL  );";
 
-        String createDevicePerformanceTable = "CREATE TABLE " + DevicePerformanceEntry.TABLE_NAME + " (" +
-                DevicePerformanceEntry._ID + " INTEGER PRIMARY KEY, " +
-                DevicePerformanceEntry.COLUMN_TIMESTAMP + " INTEGER NOT NULL, " +
-                DevicePerformanceEntry.COLUMN_MAC_ADDRESS + " TEXT NOT NULL, " +
-                DevicePerformanceEntry.COLUMN_DEVICE_RSSI + " INTEGER NOT NULL, " +
-                DevicePerformanceEntry.COLUMN_DEVICE_RATE + " TEXT NOT NULL  );";
+        String createWifiPerformanceTable = "CREATE TABLE " + WifiPerformanceEntry.TABLE_NAME + " (" +
+                WifiPerformanceEntry._ID + " INTEGER PRIMARY KEY, " +
+                WifiPerformanceEntry.COLUMN_TIMESTAMP + " INTEGER NOT NULL, " +
+                WifiPerformanceEntry.COLUMN_MAC_ADDRESS + " TEXT NOT NULL, " +
+                WifiPerformanceEntry.COLUMN_DEVICE_RSSI + " INTEGER NOT NULL, " +
+                WifiPerformanceEntry.COLUMN_DEVICE_RATE + " TEXT NOT NULL  );";
+
+        String createLanPerformanceTable = "CREATE TABLE " + LanPerformanceEntry.TABLE_NAME + " (" +
+                LanPerformanceEntry._ID + " INTEGER PRIMARY KEY, " +
+                LanPerformanceEntry.COLUMN_TIMESTAMP + " INTEGER NOT NULL, " +
+                LanPerformanceEntry.COLUMN_PORT + " TEXT NOT NULL, " +
+                LanPerformanceEntry.COLUMN_MAC_ADDRESS + " TEXT NOT NULL, " +
+                LanPerformanceEntry.COLUMN_BYTES_SENT + " INTEGER NOT NULL, " +
+                LanPerformanceEntry.COLUMN_BYTES_RECEIVED + " INTEGER NOT NULL  );";
 
         sqLiteDatabase.execSQL(createDeviceTable);
-        sqLiteDatabase.execSQL(createDevicePerformanceTable);
+        sqLiteDatabase.execSQL(createWifiPerformanceTable);
+        sqLiteDatabase.execSQL(createLanPerformanceTable);
     }
 
     @Override

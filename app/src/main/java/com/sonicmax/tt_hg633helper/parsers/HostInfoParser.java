@@ -3,7 +3,7 @@ package com.sonicmax.tt_hg633helper.parsers;
 import android.content.Context;
 import android.util.Log;
 
-import com.sonicmax.tt_hg633helper.database.DeviceDataProvider;
+import com.sonicmax.tt_hg633helper.database.WifiDeviceDataProvider;
 import com.sonicmax.tt_hg633helper.utilities.SharedPreferenceManager;
 
 import org.json.JSONArray;
@@ -11,7 +11,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -119,7 +118,7 @@ public class HostInfoParser {
     public static void insertPerformanceRecordsToDatabase(Context context, JSONArray data) throws JSONException {
         List<JSONObject> devices = getActiveDevices(data);
 
-        DeviceDataProvider dataProvider = new DeviceDataProvider(context);
+        WifiDeviceDataProvider dataProvider = new WifiDeviceDataProvider(context);
 
         long timestamp = new Date().getTime() - SharedPreferenceManager.getLong(context, "reference_timestamp");
 

@@ -34,7 +34,9 @@ public class ApiPathManager {
             case "wizard_wifi": // Basic information on WLAN
             case "deviceinfo": // Provides device name, serial number, etc
             case "diagnose_ping": // POST to ping server, GET for status updates
+            case "diagnose_lan": // Provides detailed information on devices connected to ethernet ports
             case "HostInfo": // Provides detailed information on devices connected to network.
+            case "HostInfo?devicetype=wireless": // ^ but only wireless devices
             case "selfhelp": // Shows whether self help is enabled or not
             case "usbdevice": // Untested - presumably provides information on USB devices connected to router
             case "useraccount": // Provides information on user account (username, account level, etc)

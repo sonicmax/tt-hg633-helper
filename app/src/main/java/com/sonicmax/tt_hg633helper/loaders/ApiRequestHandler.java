@@ -7,8 +7,8 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.util.Log;
 
-import com.sonicmax.tt_hg633helper.database.DeviceDataProvider;
 import com.sonicmax.tt_hg633helper.network.WebRequest;
+import com.sonicmax.tt_hg633helper.parsers.DiagnoseLanParser;
 import com.sonicmax.tt_hg633helper.parsers.HostInfoParser;
 import com.sonicmax.tt_hg633helper.utilities.ApiPathManager;
 import com.sonicmax.tt_hg633helper.utilities.DataFilter;
@@ -29,13 +29,15 @@ public class ApiRequestHandler implements LoaderManager.LoaderCallbacks<Object> 
 
     // Endpoint strings
     private final String HOST_INFO = "HostInfo";
+    private final String HOST_INFO_WIRELESS = "HostInfo?devicetype=wireless";
+    private final String DIAGNOSE_LAN = "diagnose_lan";
+
+    // Loader ID
+    private final int POST_REQUEST = -1;
 
     private final Context mContext;
     private final EventInterface mEventInterface;
     private final LoaderManager mLoaderManager;
-
-    private final int POST_REQUEST = 0;
-    private List<String> mLoaderHandles;
 
     private String mHostname;
 
@@ -43,7 +45,6 @@ public class ApiRequestHandler implements LoaderManager.LoaderCallbacks<Object> 
         mContext = context;
         mEventInterface = eventInterface;
         mLoaderManager = ((FragmentActivity) mContext).getSupportLoaderManager();
-        mLoaderHandles = new ArrayList<>();
         mHostname = "http://192.168.1.1";
     }
 
@@ -63,8 +64,7 @@ public class ApiRequestHandler implements LoaderManager.LoaderCallbacks<Object> 
         args.putString("endpoint", endpoint);
         args.putString("url", fullPath);
 
-        mLoaderHandles.add(endpoint);
-        mLoaderManager.initLoader(mLoaderHandles.size(), args, this).forceLoad();
+        mLoaderManager.initLoader(LoaderIdProvider.getIdForEndpoint(endpoint), args, this).forceLoad();
     }
 
     public void post(String endpoint, JSONObject payload) {
@@ -75,8 +75,7 @@ public class ApiRequestHandler implements LoaderManager.LoaderCallbacks<Object> 
         args.putString("url", fullPath);
         args.putString("payload", payload.toString());
 
-        mLoaderHandles.add(endpoint);
-        mLoaderManager.initLoader(mLoaderHandles.size(), args, this).forceLoad();
+        mLoaderManager.initLoader(LoaderIdProvider.getIdForEndpoint(endpoint), args, this).forceLoad();
     }
 
     /**
@@ -88,7 +87,12 @@ public class ApiRequestHandler implements LoaderManager.LoaderCallbacks<Object> 
     private void checkAndInsertToDatabase(Object data, String endpoint) throws JSONException {
         switch(endpoint) {
             case HOST_INFO:
+            case HOST_INFO_WIRELESS:
                 HostInfoParser.insertPerformanceRecordsToDatabase(mContext, (JSONArray) data);
+                break;
+
+            case DIAGNOSE_LAN:
+                DiagnoseLanParser.insertPerformanceRecordsToDatabase(mContext, (JSONArray) data);
                 break;
 
             default:
@@ -167,15 +171,13 @@ public class ApiRequestHandler implements LoaderManager.LoaderCallbacks<Object> 
                 break;
 
             default:
-                int id = loader.getId();
-                String endpoint = mLoaderHandles.get(id - 1);
+                String endpoint = LoaderIdProvider.getEndpointFromId(loader.getId());
 
                 if (data != null) {
                     Log.d(LOG_TAG, "data: " + data.toString());
                     mEventInterface.onLoadComplete(data, endpoint);
                 }
                 else {
-                    Log.d(LOG_TAG, "Calling onError()");
                     mEventInterface.onError(endpoint);
                 }
 

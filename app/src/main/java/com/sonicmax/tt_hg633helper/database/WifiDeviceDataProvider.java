@@ -8,25 +8,25 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.sonicmax.tt_hg633helper.database.AppDataContract.DeviceEntry;
-import com.sonicmax.tt_hg633helper.database.AppDataContract.DevicePerformanceEntry;
+import com.sonicmax.tt_hg633helper.database.AppDataContract.WifiPerformanceEntry;
 
 /**
  * Provides various methods to aid with querying/inserting to device databases
  */
 
-public class DeviceDataProvider {
-    private final String LOG_TAG = DeviceDataProvider.class.getSimpleName();
+public class WifiDeviceDataProvider {
+    private final String LOG_TAG = WifiDeviceDataProvider.class.getSimpleName();
 
     private final Context mContext;
     private final DatabaseHelper mDbHelper;
     private SQLiteDatabase mDb;
 
-    public DeviceDataProvider(Context context) {
+    public WifiDeviceDataProvider(Context context) {
         this.mContext = context;
         mDbHelper = new DatabaseHelper(mContext);
     }
 
-    public DeviceDataProvider open() throws SQLException {
+    public WifiDeviceDataProvider open() throws SQLException {
         try {
             mDb = mDbHelper.getReadableDatabase();
         }
@@ -64,12 +64,12 @@ public class DeviceDataProvider {
      * @return Cursor
      */
     public Cursor getAllPerformanceRecords() {
-        String[] columns = {DevicePerformanceEntry.COLUMN_TIMESTAMP, DevicePerformanceEntry.COLUMN_MAC_ADDRESS,
-                DevicePerformanceEntry.COLUMN_DEVICE_RSSI, DevicePerformanceEntry.COLUMN_DEVICE_RATE};
+        String[] columns = {WifiPerformanceEntry.COLUMN_TIMESTAMP, WifiPerformanceEntry.COLUMN_MAC_ADDRESS,
+                WifiPerformanceEntry.COLUMN_DEVICE_RSSI, WifiPerformanceEntry.COLUMN_DEVICE_RATE};
 
-        String orderBy = DevicePerformanceEntry.COLUMN_TIMESTAMP + " ASC";
+        String orderBy = WifiPerformanceEntry.COLUMN_TIMESTAMP + " ASC";
 
-        return mDb.query(DevicePerformanceEntry.TABLE_NAME,
+        return mDb.query(WifiPerformanceEntry.TABLE_NAME,
                 columns,
                 null,
                 null,
@@ -86,13 +86,13 @@ public class DeviceDataProvider {
      * @return Cursor
      */
     public Cursor getAllPerformanceRecordsForDevice(String macAddress) {
-        String[] columns = {DevicePerformanceEntry.COLUMN_TIMESTAMP,
-                DevicePerformanceEntry.COLUMN_DEVICE_RSSI, DevicePerformanceEntry.COLUMN_DEVICE_RATE};
-        String where = DevicePerformanceEntry.COLUMN_MAC_ADDRESS + " = ?";
+        String[] columns = {WifiPerformanceEntry.COLUMN_TIMESTAMP,
+                WifiPerformanceEntry.COLUMN_DEVICE_RSSI, WifiPerformanceEntry.COLUMN_DEVICE_RATE};
+        String where = WifiPerformanceEntry.COLUMN_MAC_ADDRESS + " = ?";
         String[] whereClause = {macAddress};
-        String orderBy = DevicePerformanceEntry.COLUMN_TIMESTAMP + " ASC";
+        String orderBy = WifiPerformanceEntry.COLUMN_TIMESTAMP + " ASC";
 
-        return mDb.query(DevicePerformanceEntry.TABLE_NAME,
+        return mDb.query(WifiPerformanceEntry.TABLE_NAME,
                 columns,
                 where,
                 whereClause,
@@ -105,12 +105,12 @@ public class DeviceDataProvider {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(DevicePerformanceEntry.COLUMN_TIMESTAMP, timestamp);
-        values.put(DevicePerformanceEntry.COLUMN_MAC_ADDRESS, macAddress);
-        values.put(DevicePerformanceEntry.COLUMN_DEVICE_RSSI, rssi);
-        values.put(DevicePerformanceEntry.COLUMN_DEVICE_RATE, deviceRate);
+        values.put(WifiPerformanceEntry.COLUMN_TIMESTAMP, timestamp);
+        values.put(WifiPerformanceEntry.COLUMN_MAC_ADDRESS, macAddress);
+        values.put(WifiPerformanceEntry.COLUMN_DEVICE_RSSI, rssi);
+        values.put(WifiPerformanceEntry.COLUMN_DEVICE_RATE, deviceRate);
 
-        db.insert(DevicePerformanceEntry.TABLE_NAME, null, values);
+        db.insert(WifiPerformanceEntry.TABLE_NAME, null, values);
         db.close();
     }
 }
