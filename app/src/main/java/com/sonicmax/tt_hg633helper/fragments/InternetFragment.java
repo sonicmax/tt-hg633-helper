@@ -50,7 +50,6 @@ public class InternetFragment extends ApiConsumerFragment implements ApiRequestH
         mApiRequestHandler = new ApiRequestHandler(getContext(), this);
         mChartHelper = new DslInfoChartHelper();
 
-        mApiPollers.add(new ApiPoller(mApiRequestHandler, HEARTBEAT, 5000));
         mApiPollers.add(new ApiPoller(mApiRequestHandler, WAN_INFO, 10000));
         mApiPollers.add(new ApiPoller(mApiRequestHandler, DSL_INFO, 2000));
 

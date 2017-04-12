@@ -51,7 +51,6 @@ public class LanDeviceFragment extends ApiConsumerFragment implements ApiRequest
         mDeviceAdapter = new LanDeviceAdapter(getContext());
         mLayoutManager = new LinearLayoutManager(getContext());
         mApiRequestHandler = new ApiRequestHandler(getContext(), this);
-        mApiPollers.add(new ApiPoller(mApiRequestHandler, HEARTBEAT, 5000));
         mApiPollers.add(new ApiPoller(mApiRequestHandler, DIAGNOSE_LAN, 3000));
     }
 

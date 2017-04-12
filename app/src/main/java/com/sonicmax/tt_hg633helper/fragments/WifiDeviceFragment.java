@@ -52,7 +52,6 @@ public class WifiDeviceFragment extends ApiConsumerFragment implements ApiReques
         mDeviceAdapter = new WifiDeviceAdapter(getContext());
         mLayoutManager = new LinearLayoutManager(getContext());
 
-        mApiPollers.add(new ApiPoller(mApiRequestHandler, HEARTBEAT, 5000));
         mApiPollers.add(new ApiPoller(mApiRequestHandler, HOST_INFO, 3000));
     }
 
