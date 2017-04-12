@@ -108,7 +108,7 @@ public class InternetInfoUiHelper {
 
         SpannableStringBuilder builder = new SpannableStringBuilder();
 
-        appendBold(builder, UP_RATE_TEXT);
+        /*appendBold(builder, UP_RATE_TEXT);
         builder.append(data.getString(UP_RATE)).append(KBITS).append(LINEBREAK);
 
         appendBold(builder, DOWN_RATE_TEXT);
@@ -124,12 +124,12 @@ public class InternetInfoUiHelper {
         builder.append(data.getString(UP_INTERLEAVE)).append(LINEBREAK);
 
         appendBold(builder, DOWN_INTERLEAVE_TEXT);
-        builder.append(data.getString(DOWN_INTERLEAVE)).append(LINEBREAK);
+        builder.append(data.getString(DOWN_INTERLEAVE)).append(LINEBREAK);*/
 
         appendBold(builder, LINE_STANDARD_TEXT);
         builder.append(data.getString(LINE_STANDARD)).append(LINEBREAK);
 
-        appendBold(builder, UP_ATTENUATION_TEXT);
+        /*appendBold(builder, UP_ATTENUATION_TEXT);
         builder.append(data.getString(UP_ATTENUATION)).append(DB).append(LINEBREAK);
 
         appendBold(builder, DOWN_ATTENUATION_TEXT);
@@ -139,7 +139,7 @@ public class InternetInfoUiHelper {
         builder.append(data.getString(UP_POWER)).append(DBM).append(LINEBREAK);
 
         appendBold(builder, DOWN_POWER_TEXT);
-        builder.append(data.getString(DOWN_POWER)).append(DBM).append(LINEBREAK);
+        builder.append(data.getString(DOWN_POWER)).append(DBM).append(LINEBREAK);*/
 
         appendBold(builder, CHANNEL_TYPE_TEXT);
         builder.append(data.getString(CHANNEL_TYPE)).append(LINEBREAK);

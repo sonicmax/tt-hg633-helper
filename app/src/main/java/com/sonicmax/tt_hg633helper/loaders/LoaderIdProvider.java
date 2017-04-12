@@ -11,6 +11,8 @@ import java.util.Random;
 public class LoaderIdProvider {
     private final static String LOG_TAG = "LoaderIdProvider";
 
+    private final static int ERROR = -2;
+
     private final static String HEARTBEAT = "heartbeat";
     private final static int HEARTBEAT_ID = 0;
 
@@ -34,6 +36,12 @@ public class LoaderIdProvider {
 
     private final static String HOST_INFO_WIRELESS = "HostInfo?devicetype=wireless";
     private final static int HOST_INFO_WIRELESS_ID = 7;
+
+    private final static String DEFAULT_WAN_INFO = "defaultwaninfo";
+    private final static int DEFAULT_WAN_INFO_ID = 8;
+
+    private final static String DSL_INFO = "dslinfo";
+    private final static int DSL_INFO_ID = 9;
 
     /**
      * Provides each endpoint with a unique ID (for use in AsyncTaskLoader).
@@ -67,9 +75,15 @@ public class LoaderIdProvider {
             case HOST_INFO_WIRELESS:
                 return HOST_INFO_WIRELESS_ID;
 
+            case DEFAULT_WAN_INFO:
+                return DEFAULT_WAN_INFO_ID;
+
+            case DSL_INFO:
+                return DSL_INFO_ID;
+
             default:
                 Log.e(LOG_TAG, "No id to return for endpoint \"" + endpoint + "\"");
-                return new Random().nextInt(-2 + 1 + 30) - 30;
+                return ERROR;
         }
     }
 
@@ -104,6 +118,12 @@ public class LoaderIdProvider {
 
             case HOST_INFO_WIRELESS_ID:
                 return HOST_INFO_WIRELESS;
+
+            case DEFAULT_WAN_INFO_ID:
+                return DEFAULT_WAN_INFO;
+
+            case DSL_INFO_ID:
+                return DSL_INFO;
 
             default:
                 Log.e(LOG_TAG, "No endpoint to return for id \"" + id + "\"");

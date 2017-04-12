@@ -7,19 +7,24 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
 import com.sonicmax.tt_hg633helper.R;
+import com.sonicmax.tt_hg633helper.charting.TimestampAxisValueFormatter;
 import com.sonicmax.tt_hg633helper.loaders.ApiRequestHandler;
 import com.sonicmax.tt_hg633helper.network.ApiPoller;
 import com.sonicmax.tt_hg633helper.charting.DslInfoChartHelper;
 import com.sonicmax.tt_hg633helper.ui.InternetInfoUiHelper;
 import com.sonicmax.tt_hg633helper.ui.ProgressDialogHandler;
+import com.sonicmax.tt_hg633helper.utilities.SharedPreferenceManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Date;
 
 public class InternetFragment extends ApiConsumerFragment implements ApiRequestHandler.EventInterface {
     private final String LOG_TAG = this.getClass().getSimpleName();
@@ -35,7 +40,7 @@ public class InternetFragment extends ApiConsumerFragment implements ApiRequestH
 
     private boolean mWaitingForWan = true;
     private boolean mWaitingForDsl = true;
-    private int mDuration;
+    private long mReferenceTimestamp;
 
     public InternetFragment() {}
 
@@ -48,8 +53,8 @@ public class InternetFragment extends ApiConsumerFragment implements ApiRequestH
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         mApiRequestHandler = new ApiRequestHandler(getContext(), this);
-        mChartHelper = new DslInfoChartHelper();
-
+        mReferenceTimestamp = SharedPreferenceManager.getLong(getContext(), "reference_timestamp");
+        mChartHelper = new DslInfoChartHelper(mReferenceTimestamp);
         mApiPollers.add(new ApiPoller(mApiRequestHandler, WAN_INFO, 10000));
         mApiPollers.add(new ApiPoller(mApiRequestHandler, DSL_INFO, 2000));
 
@@ -63,8 +68,29 @@ public class InternetFragment extends ApiConsumerFragment implements ApiRequestH
         View rootView = inflater.inflate(R.layout.fragment_internet, container, false);
         mInternetInfoView = (TextView) rootView.findViewById(R.id.internet_info_view);
         mInternetInfoChart = (LineChart) rootView.findViewById(R.id.internet_info_chart);
+
+        CheckBox noise = (CheckBox) rootView.findViewById(R.id.checkbox_noise);
+        CheckBox interleave = (CheckBox) rootView.findViewById(R.id.checkbox_interleave);
+        CheckBox attenuation = (CheckBox) rootView.findViewById(R.id.checkbox_attenuation);
+        CheckBox power = (CheckBox) rootView.findViewById(R.id.checkbox_power);
+
+        mChartHelper.prepareUi(getContext(), mInternetInfoChart);
+
+        noise.setOnClickListener(checkboxHandler);
+        noise.setChecked(true);
+        interleave.setOnClickListener(checkboxHandler);
+        attenuation.setOnClickListener(checkboxHandler);
+        power.setOnClickListener(checkboxHandler);
+
         return rootView;
     }
+
+    private View.OnClickListener checkboxHandler = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            mChartHelper.toggleDataSet(view.getId());
+        }
+    };
 
     @Override
     public void onDetach() {
@@ -107,6 +133,10 @@ public class InternetFragment extends ApiConsumerFragment implements ApiRequestH
 
                 if (endpoint.equals(DSL_INFO)) {
                     mWaitingForDsl = false;
+
+                    long relativeTime = new Date().getTime() - mReferenceTimestamp;
+                    mChartHelper.getEntriesFromResponse((JSONObject) data, relativeTime);
+
                     if (!mWaitingForWan) {
                         populateUi();
                     }
@@ -147,12 +177,9 @@ public class InternetFragment extends ApiConsumerFragment implements ApiRequestH
             mInternetInfoView.setText(info);
 
             // Prepare data and update line chart
-            mChartHelper.getEntriesFromResponse(dslInfo, mDuration);
             LineData data = new LineData(mChartHelper.getLineDataSets());
             mInternetInfoChart.setData(data);
             mInternetInfoChart.invalidate();
-            mDuration += 10;
-
 
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Error while populating UI:", e);
