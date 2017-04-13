@@ -18,7 +18,7 @@ public class HomeNetworkActivity extends BaseActivity {
     private final String LOG_TAG = this.getClass().getSimpleName();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_home_network);
 

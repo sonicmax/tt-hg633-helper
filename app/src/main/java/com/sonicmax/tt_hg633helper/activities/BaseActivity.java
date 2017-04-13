@@ -12,7 +12,7 @@ import java.util.Date;
 public class BaseActivity extends AppCompatActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         checkReferenceTimestamp();
     }
