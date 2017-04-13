@@ -1,10 +1,14 @@
 package com.sonicmax.tt_hg633helper.activities;
 
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.sonicmax.tt_hg633helper.R;
+import com.sonicmax.tt_hg633helper.services.HeartbeatManager;
 import com.sonicmax.tt_hg633helper.utilities.SharedPreferenceManager;
 
 import java.util.Date;
@@ -15,6 +19,30 @@ public class BaseActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         checkReferenceTimestamp();
+    }
+
+    public void startHeartbeat() {
+        if (!isServiceRunning(HeartbeatManager.class)) {
+            Intent intent = new Intent(Intent.ACTION_SYNC, null, this, HeartbeatManager.class);
+            startService(intent);
+        }
+    }
+
+    public void stopHeartbeat() {
+        if (isServiceRunning(HeartbeatManager.class)) {
+            Intent intent = new Intent(Intent.ACTION_SYNC, null, this, HeartbeatManager.class);
+            stopService(intent);
+        }
+    }
+
+    public boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

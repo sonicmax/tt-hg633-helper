@@ -1,10 +1,15 @@
 package com.sonicmax.tt_hg633helper.services;
 
-import android.app.IntentService;
-import android.content.Context;
+import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Process;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.sonicmax.tt_hg633helper.network.ApiPathManager;
 import com.sonicmax.tt_hg633helper.network.WebRequest;
@@ -15,10 +20,9 @@ import org.json.JSONObject;
 
 /**
  * Makes regular requests to the heartbeat API (required for session token to remain valid).
- * Should be destroyed when app is not running
+ * TODO: Needs to be stopped when app is not running
  */
-
-public class HeartbeatManager extends IntentService {
+public class HeartbeatManager extends Service {
     private final String LOG_TAG = this.getClass().getSimpleName();
     private final String HEARTBEAT = "heartbeat";
     private final String INTERVAL = "interval";
@@ -26,39 +30,73 @@ public class HeartbeatManager extends IntentService {
 
     private final String mHostName;
     private final String mHeartbeatEndpoint;
+    private final WebRequest mWebRequest;
 
-    private boolean mShouldPoll = true;
+    private Looper mServiceLooper;
+    private Handler mServiceHandler;
 
     public HeartbeatManager() {
-        super(HeartbeatManager.class.getName());
+        super();
+
         mHostName = "http://192.168.1.1";
         mHeartbeatEndpoint = mHostName + ApiPathManager.getFullPath(HEARTBEAT);
+        mWebRequest = new WebRequest(this);
     }
 
     @Override
-    protected void onHandleIntent(Intent workIntent) {
-        heartbeat();
+    public void onCreate() {
+        HandlerThread thread = new HandlerThread(LOG_TAG, Process.THREAD_PRIORITY_BACKGROUND);
+        thread.start();
+
+        mServiceLooper = thread.getLooper();
+        // start the service using the background handler
+        mServiceHandler = new Handler(mServiceLooper) {
+
+            @Override
+            public void handleMessage(Message msg) {
+                heartbeat();
+            }
+        };
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Toast.makeText(this, "onStartCommand", Toast.LENGTH_SHORT).show();
+
+        Message message = mServiceHandler.obtainMessage();
+        mServiceHandler.sendMessage(message);
+
+        return START_STICKY;
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
     private void heartbeat() {
-        String response = new WebRequest(this).get(mHeartbeatEndpoint);
-        int interval = getIntervalFromResponse(response);
+        String response = mWebRequest.get(mHeartbeatEndpoint);
 
-        if (interval == ERROR) {
-            this.stopSelf();
-        }
+        if (response != null) {
+            int interval = getIntervalFromResponse(response);
 
-        else {
-            new Handler().postDelayed(new Runnable() {
-                public void run() {
+            if (interval == ERROR) {
+                this.stopSelf();
 
-                    if (mShouldPoll) {
+            } else {
+                new Handler().postDelayed(new Runnable() {
+
+                    public void run() {
                         heartbeat();
                     }
 
-                }
+                }, interval);
+            }
+        }
 
-            }, interval);
+        else {
+            // Null response means session token was invalidated (or we lost connection)
+            this.stopSelf();
         }
     }
 
