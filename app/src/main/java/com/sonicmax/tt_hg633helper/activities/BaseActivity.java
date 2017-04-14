@@ -68,7 +68,6 @@ public class BaseActivity extends AppCompatActivity {
 
     /**
      * Tell Service that Activity has been paused, and then call unbindService().
-     * If this was the first instance of BaseActivity, then Service will destroy itself.
      */
     private void unbindFromServices() {
         sendStatusCodeToService(CLOSE_SIGNAL);
