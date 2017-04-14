@@ -22,9 +22,10 @@ import java.util.Date;
 
 public class BaseActivity extends AppCompatActivity {
     private final String LOG_TAG = this.getClass().getSimpleName();
-    private final int OPEN = 1;
-    private final int CLOSED = 2;
-    private final int START = 3;
+
+    // Codes for Messenger
+    private final int CLOSE_SIGNAL = 1;
+    private final int KEEP_OPEN_SIGNAL = 2;
 
     private ServiceConnection mServiceConnection;
     private Messenger mMessenger;
@@ -58,8 +59,7 @@ public class BaseActivity extends AppCompatActivity {
         mServiceConnection = new ServiceConnection() {
             public void onServiceConnected(ComponentName className, IBinder iBinder) {
                 mMessenger = new Messenger(iBinder);
-                sendStatusCodeToService(START);
-                sendStatusCodeToService(OPEN);
+                sendStatusCodeToService(KEEP_OPEN_SIGNAL);
             }
 
             public void onServiceDisconnected(ComponentName className) {}
@@ -71,7 +71,7 @@ public class BaseActivity extends AppCompatActivity {
      * If this was the first instance of BaseActivity, then Service will destroy itself.
      */
     private void unbindFromServices() {
-        sendStatusCodeToService(CLOSED);
+        sendStatusCodeToService(CLOSE_SIGNAL);
 
         try {
             unbindService(mServiceConnection);

@@ -2,6 +2,7 @@ package com.sonicmax.tt_hg633helper.services;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -19,23 +20,26 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Makes regular requests to the heartbeat API (required for session token to remain valid).
- * TODO: Needs to be stopped when app is not running
+ * Makes regular requests to the triggerHeartbeat API (required for session token to remain valid).
  */
 public class HeartbeatManager extends Service {
     private final String LOG_TAG = this.getClass().getSimpleName();
+
+    // Codes for ServiceHandler
+    private final int CLOSE = 1;
+    private final int KEEP_OPEN = 2;
+
+    // Error code for getIntervalFromResponse()
     private final int JSON_ERROR = -1;
 
-    private final String mHeartbeatEndpoint;
-    private final WebRequest mWebRequest;
-
+    private String mHeartbeatEndpoint;
+    private WebRequest mWebRequest;
     private Messenger mMessenger;
     private Looper mServiceLooper;
     private Handler mServiceHandler;
-
+    private Handler mDelayedExitHandler;
     private boolean mShouldRun;
-    private boolean mIsRunning = false;
-    private int mActivityCount = 1;
+    private boolean mHasStarted = false;
 
     public HeartbeatManager() {
         super();
@@ -51,33 +55,23 @@ public class HeartbeatManager extends Service {
         HandlerThread thread = new HandlerThread(LOG_TAG, Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
         mServiceLooper = thread.getLooper();
+        mDelayedExitHandler = new Handler();
         mServiceHandler = new Handler(mServiceLooper) {
-            final int OPEN = 1;
-            final int CLOSED = 2;
-            final int START = 3;
-
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.getData().getInt("code")) {
-                    case OPEN:
-                        mActivityCount++;
+                    case CLOSE:
+                        triggerDelayedStop();
                         break;
 
-                    case CLOSED:
-                        mActivityCount--;
-                        break;
-
-                    case START:
-                        if (!mIsRunning) {
-                            mIsRunning = true;
-                            heartbeat();
-                        }
+                    case KEEP_OPEN:
+                        mDelayedExitHandler.removeCallbacksAndMessages(null);
                         break;
                 }
 
-                if (mActivityCount == 0) {
-                    mShouldRun = false;
-                    stopSelf();
+                if (!mHasStarted) {
+                    triggerHeartbeat();
+                    mHasStarted = true;
                 }
             }
         };
@@ -98,7 +92,7 @@ public class HeartbeatManager extends Service {
         return mMessenger.getBinder();
     }
 
-    private void heartbeat() {
+    private void triggerHeartbeat() {
         String response = mWebRequest.get(mHeartbeatEndpoint);
 
         if (response != null) {
@@ -106,7 +100,7 @@ public class HeartbeatManager extends Service {
 
             if (interval == JSON_ERROR) {
                 // Maybe the firmware was updated
-                this.stopSelf();
+                stopSelf();
 
             } else {
 
@@ -114,15 +108,10 @@ public class HeartbeatManager extends Service {
                     new Handler().postDelayed(new Runnable() {
 
                         public void run() {
-                            heartbeat();
+                            triggerHeartbeat();
                         }
 
                     }, interval);
-                }
-
-                else {
-                    mIsRunning = false;
-                    this.stopSelf();
                 }
             }
         }
@@ -131,6 +120,19 @@ public class HeartbeatManager extends Service {
             // Null response means session token was invalidated (or we lost connection)
             this.stopSelf();
         }
+    }
+
+    private void triggerDelayedStop() {
+        final int TWO_SECONDS = 2000;
+
+        mDelayedExitHandler.postDelayed(new Runnable() {
+
+            public void run() {
+                mShouldRun = false;
+                stopSelf();
+            }
+
+        }, TWO_SECONDS);
     }
 
     /**
